@@ -1,9 +1,23 @@
 const Pool = require('pg').Pool;
 const AWS = require('aws-sdk');
 const fs = require('fs');
+const { connect } = require('http2');
 const { resolve } = require('path');
-const accessKeyId = "";
-const secretAccessKey = "";
+// const redis = require('redis');
+const Redis = require('ioredis');
+
+const client = new Redis({
+	port: 6379,
+	host: 'redisyayak.9nxbg7.0001.use1.cache.amazonaws.com',
+});
+//client redis
+// const client = redis.createClient('6379','redisyayak.9nxbg7.0001.use1.cache.amazonaws.com')
+
+const key = 'user';
+
+// access key aws
+const accessKeyId = "AKIAZDPMVULRHARIZ7VU";
+const secretAccessKey = "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";
 
 const pool = new Pool({
 	user: 'postgres',
@@ -51,21 +65,6 @@ const getFile = (fileName = '') => {
 	 })
 }
 
-const removeFile = (fileName = '') => {
-	return new Promise((resolve,params) =>{
-		const param = {
-			Key: fileName,
-			Bucket: "clientbuckettia"
-		};
-		s3.deleteObject(param, (err, data) => {
-			 if(err){
-				 throw err;
-			 }
-			 resolve(data);
-		 });
-	})
-}
-
 // input data to s3 
 const inputFile = (fileName,file) => {
 	return new Promise((resolve,params) =>{
@@ -85,12 +84,36 @@ const inputFile = (fileName,file) => {
 	});
 }
 
+// remove file from s3
+const removeFile = (fileName = '') => {
+	return new Promise((resolve,params) =>{
+		const param = {
+			Key: fileName,
+			Bucket: "clientbuckettia"
+		};
+		s3.deleteObject(param, (err, data) => {
+			 if(err){
+				 throw err;
+			 }
+			 resolve(data);
+		 });
+	})
+}
+
 const getUsers = (request, response) => {
 	pool.query('SELECT * FROM table_user',(error,results)=>{
 		if(error){
 			throw error
 		}
-		var rows = results.rows
+		const dataRedis = getRedis(key);
+		if(dataRedis){
+			console.log(dataRedis)
+			var rows = JSON.parse(dataRedis);
+		}else{
+			var rows = results.rows
+			setRedis(key,JSON.stringify(rows))
+		}
+		
 		response.status(200).json(rows)
 	})
 }
@@ -169,6 +192,21 @@ const deleteUser = (request,response) => {
 			});
 		})
 	})
+}
+
+// get data from redis
+const getRedis = (key) => {
+	client.get(key,(error,result)=>{
+		if(error){
+			throw error;
+		}
+		return result;
+	})
+}
+
+// set data to redis
+const setRedis = (key,val) => {
+	client.set(key,val)
 }
 
 const gen_id = (length = 32) => {
