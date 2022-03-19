@@ -2,8 +2,8 @@ const Pool = require('pg').Pool;
 const AWS = require('aws-sdk');
 const fs = require('fs');
 const { resolve } = require('path');
-const accessKeyId = "AKIAZDPMVULRHARIZ7VU";
-const secretAccessKey = "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";
+const accessKeyId = "";
+const secretAccessKey = "";
 
 const pool = new Pool({
 	user: 'postgres',
