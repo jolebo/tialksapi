@@ -6,18 +6,18 @@ const { resolve } = require('path');
 // const redis = require('redis');
 const Redis = require('ioredis');
 
-const client = new Redis({
-	port: 6379,
-	host: 'redisyayak.9nxbg7.0001.use1.cache.amazonaws.com',
-});
+// const client = new Redis({
+// 	port: 6379,
+// 	host: 'redisyayak.9nxbg7.0001.use1.cache.amazonaws.com',
+// });
 //client redis
 // const client = redis.createClient('6379','redisyayak.9nxbg7.0001.use1.cache.amazonaws.com')
 
 const key = 'user';
 
 // access key aws
-const accessKeyId = "AKIAZDPMVULRHARIZ7VU";
-const secretAccessKey = "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";
+const accessKeyId = "";
+const secretAccessKey = "";
 
 const pool = new Pool({
 	user: 'postgres',
@@ -105,14 +105,14 @@ const getUsers = (request, response) => {
 		if(error){
 			throw error
 		}
-		const dataRedis = getRedis(key);
-		if(dataRedis){
-			console.log(dataRedis)
-			var rows = JSON.parse(dataRedis);
-		}else{
+// 		const dataRedis = getRedis(key);
+// 		if(dataRedis){
+// 			console.log(dataRedis)
+// 			var rows = JSON.parse(dataRedis);
+// 		}else{
 			var rows = results.rows
-			setRedis(key,JSON.stringify(rows))
-		}
+// 			setRedis(key,JSON.stringify(rows))
+// 		}
 		
 		response.status(200).json(rows)
 	})
